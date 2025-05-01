@@ -78,3 +78,12 @@ class PostSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['author'] = self.context['request'].user
         return super().create(validated_data)
+    
+class NotificationSerializer(serializers.ModelSerializer):
+    sender = UserSerializer(read_only=True)
+    
+    class Meta:
+        model = Notification
+        fields = ['id', 'recipient', 'sender', 'notification_type', 'post', 
+                 'comment', 'created_at', 'is_read']
+        read_only_fields = ['recipient', 'sender']
