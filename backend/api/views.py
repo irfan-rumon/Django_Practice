@@ -111,3 +111,23 @@ class PostViewSet(viewsets.ModelViewSet):
         else:
             like.delete()
             return Response({"status": "unliked"})
+        
+
+class CommentViewSet(viewsets.ModelViewSet):
+    queryset = Comment.objects.all()
+    serializer_class = CommentSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    
+    def perform_create(self, serializer):
+        comment = serializer.save()
+        post = comment.post
+        
+        # Create notification for the post author if not self-comment
+        if post.author != self.request.user:
+            Notification.objects.create(
+                recipient=post.author,
+                sender=self.request.user,
+                notification_type='comment',
+                post=post,
+                comment=comment
+            )
