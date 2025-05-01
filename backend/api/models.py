@@ -18,3 +18,17 @@ class Profile(models.Model):
     @property
     def followers_count(self):
         return self.followers.count()
+    
+
+class Post(models.Model):
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='posts')
+    content = models.TextField()
+    image = models.ImageField(upload_to='post_images/', null=True, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.author.username}'s post at {self.created_at.strftime('%Y-%m-%d %H:%M')}"
