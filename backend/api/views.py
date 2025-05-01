@@ -32,3 +32,37 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = UserSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['username', 'first_name', 'last_name']
+
+
+class ProfileViewSet(viewsets.ModelViewSet):
+    queryset = Profile.objects.all()
+    serializer_class = ProfileSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    
+    @action(detail=True, methods=['post'])
+    def follow(self, request, pk=None):
+        profile = self.get_object()
+        user = request.user
+        
+        if profile.user == user:
+            return Response({"detail": "You cannot follow yourself."},
+                           status=status.HTTP_400_BAD_REQUEST)
+        
+        if profile.followers.filter(id=user.id).exists():
+            profile.followers.remove(user)
+            return Response({"status": "unfollowed"})
+        else:
+            profile.followers.add(user)
+            # Create notification
+            Notification.objects.create(
+                recipient=profile.user,
+                sender=user,
+                notification_type='follow'
+            )
+            return Response({"status": "following"})
+    
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        profile = get_object_or_404(Profile, user=request.user)
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)
