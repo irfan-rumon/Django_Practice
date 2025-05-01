@@ -66,3 +66,48 @@ class ProfileViewSet(viewsets.ModelViewSet):
         profile = get_object_or_404(Profile, user=request.user)
         serializer = self.get_serializer(profile)
         return Response(serializer.data)
+    
+
+class PostViewSet(viewsets.ModelViewSet):
+    queryset = Post.objects.all()
+    serializer_class = PostSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['content', 'author__username']
+    
+    @action(detail=False, methods=['get'])
+    def feed(self, request):
+        user = request.user
+        # Get posts from people the user follows and their own posts
+        following_users = user.following.values_list('user', flat=True)
+        posts = Post.objects.filter(author__in=following_users) | Post.objects.filter(author=user)
+        posts = posts.order_by('-created_at')
+        
+        page = self.paginate_queryset(posts)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(posts, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def like(self, request, pk=None):
+        post = self.get_object()
+        user = request.user
+        
+        like, created = Like.objects.get_or_create(user=user, post=post)
+        
+        if created:
+            # Create notification for the post author if not self-like
+            if post.author != user:
+                Notification.objects.create(
+                    recipient=post.author,
+                    sender=user,
+                    notification_type='like',
+                    post=post
+                )
+            return Response({"status": "liked"})
+        else:
+            like.delete()
+            return Response({"status": "unliked"})
