@@ -5,8 +5,13 @@ from decimal import Decimal
 class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
-        fields = ['id', 'title']
-        read_only_fields = ['id']
+        fields = ['id', 'title', 'product_count']
+        read_only_fields = ['id', 'product_count']
+
+    product_count = serializers.SerializerMethodField(method_name='calc_product_cnt')
+
+    def calc_product_cnt(self, collection:Collection):
+        return collection.products.count()
 
 
 class ProductSerializer(serializers.ModelSerializer):
