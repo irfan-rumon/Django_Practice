@@ -6,15 +6,18 @@ class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
         fields = ['id', 'title']
+        read_only_fields = ['id']
 
 
 class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
-        fields = ['id', 'title', 'price', 'collection']
-
-    price = serializers.DecimalField(max_digits=6, decimal_places=2, source = 'unit_price')
-    collection = CollectionSerializer()
+        fields = ['id', 'title', 'slug', 'description', 'unit_price', 'inventory', 'collection']
+        read_only_fields = ['id']
+       
+       
+    #price = serializers.DecimalField(max_digits=6, decimal_places=2, source = 'unit_price')
+    #collection = CollectionSerializer()
 
 
 # class ProductSerializer(serializers.Serializer):

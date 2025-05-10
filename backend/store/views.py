@@ -7,7 +7,6 @@ from .models import Product
 from .setrializers import ProductSerializer
 
 # Create your views here.
-
 @api_view(['GET', 'POST'])
 def product_list(request):
     if request.method == 'GET':
@@ -16,8 +15,11 @@ def product_list(request):
         return Response(serializer.data)
     elif request.method == 'POST':
         serializer = ProductSerializer(data = request.data)
-        #serializer.validated_data
-        return Response("posted")
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
 
 @api_view()
 def product_detail(request, id):
