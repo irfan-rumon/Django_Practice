@@ -3,15 +3,13 @@ from .models import Product, Collection
 from decimal import Decimal
 
 class CollectionSerializer(serializers.ModelSerializer):
+    products_count = serializers.IntegerField(read_only=True)
+    
     class Meta:
         model = Collection
-        fields = ['id', 'title', 'product_count']
-        read_only_fields = ['id', 'product_count']
+        fields = ['id', 'title', 'products_count']
+        read_only_fields = ['id']
 
-    product_count = serializers.SerializerMethodField(method_name='calc_product_cnt')
-
-    def calc_product_cnt(self, collection:Collection):
-        return collection.products.count()
 
 
 class ProductSerializer(serializers.ModelSerializer):
@@ -20,6 +18,13 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'slug', 'description', 'unit_price', 'inventory', 'collection']
         read_only_fields = ['id']
        
+
+
+
+# ===============================================================
+
+
+
        
     #price = serializers.DecimalField(max_digits=6, decimal_places=2, source = 'unit_price')
     #collection = CollectionSerializer()
