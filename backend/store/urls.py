@@ -7,7 +7,7 @@ from rest_framework_nested import routers
 
 # Define parent router
 router = routers.DefaultRouter()
-router.register('products', views.ProductViewSet)
+router.register('products', views.ProductViewSet, basename='products')
 router.register('collections', views.CollectionViewSet)
 
 #parent router, parent prefix, lookup parameter [product_pk]
