@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, Collection
+from .models import Product, Collection, Review
 from decimal import Decimal
 
 class CollectionSerializer(serializers.ModelSerializer):
@@ -17,6 +17,18 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['id', 'title', 'slug', 'description', 'unit_price', 'inventory', 'collection']
         read_only_fields = ['id']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Review
+        fields = ['id', 'name', 'description', 'date']
+        read_only_fields = ['id']
+
+    def create(self, validated_date):
+        product_id = self.context['product_id']  #retrieve the 'product_id' passed from view 
+        return Review.objects.create(product_id=product_id, **validated_date)
+
        
 
 

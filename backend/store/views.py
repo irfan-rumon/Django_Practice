@@ -3,8 +3,8 @@ from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Product, Collection, OrderItem
-from .setrializers import ProductSerializer, CollectionSerializer
+from .models import Product, Collection, OrderItem, Review
+from .setrializers import ProductSerializer, CollectionSerializer, ReviewSerializer
 from rest_framework.views import APIView
 from django.db.models import Count
 
@@ -44,6 +44,14 @@ class CollectionViewSet(ModelViewSet):
                 status=status.HTTP_405_METHOD_NOT_ALLOWED
             )
         return super().destroy(request, *args, **kwargs)
+    
+
+class ReviewViewSet(ModelViewSet):
+    queryset = Review.objects.all()
+    serializer_class = ReviewSerializer
+
+    def get_serializer_context(self):
+        return {'product_id': self.kwargs['product_pk']}   #pass this dictionary to serializer
     
 
     
