@@ -7,17 +7,33 @@ from .models import Product, Collection
 from .setrializers import ProductSerializer, CollectionSerializer
 from rest_framework.views import APIView
 
-class ProductList(APIView):
-    def get(self, request):
-        queryset = Product.objects.select_related('collection').all()
-        serializer = ProductSerializer(queryset, many=True)
-        return Response(serializer.data)
+from rest_framework.mixins import ListModelMixin, CreateModelMixin
+from rest_framework.generics import ListCreateAPIView
+
+class ProductList(ListCreateAPIView):
+    queryset = Product.objects.select_related('collection').all()
+    serializer_class = ProductSerializer
+
+    # def get_queryset(self):
+    #     return Product.objects.select_related('collection').all()
     
-    def post(self, request):
-        serializer = ProductSerializer(data = request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()      #it calls the built-in "create()" method of the serializer class, if needed override create mrhod
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    # def get_serializer_class(self):
+    #     return ProductSerializer
+    
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
+
+    # def get(self, request):
+    #     queryset = Product.objects.select_related('collection').all()
+    #     serializer = ProductSerializer(queryset, many=True)
+    #     return Response(serializer.data)
+    
+    # def post(self, request):
+    #     serializer = ProductSerializer(data = request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()      #it calls the built-in "create()" method of the serializer class, if needed override create mrhod
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
     
 
 class ProductDetails(APIView):
